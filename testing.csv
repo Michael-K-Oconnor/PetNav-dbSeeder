@@ -1,0 +1,3 @@
+pet_id,class,family,species,img_url
+1111,mammal,Felidae,Tiger,https://s3.us-east-2.amazonaws.com/petpicks/1111.jpg
+1112,mammal,Felidae,Lion,https://s3.us-east-2.amazonaws.com/petpicks/1112.jpg

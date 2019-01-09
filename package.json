@@ -1,0 +1,19 @@
+{
+  "name": "db-seeder",
+  "version": "1.0.0",
+  "description": "database seeder",
+  "main": "",
+  "scripts": {
+    "mongo-seed": "node --max-old-space-size=8192 mongoSeed.js"
+  },
+  "author": "Michael O'Connor",
+  "license": "ISC",
+  "devDependencies": {
+    "faker": "^4.1.0"
+  },
+  "dependencies": {
+    "knex": "^0.16.3",
+    "mongoose": "^5.4.0",
+    "pg": "^7.7.1"
+  }
+}
