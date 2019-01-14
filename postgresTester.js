@@ -23,6 +23,8 @@ const db = require("knex")({
   }
 });
 
+let testResultsArr = [];
+
 //////////////////////////////////////////////////
 ///////// SERIAL DB QUERY FUNCTIONS  /////////////
 //////////////////////////////////////////////////
@@ -30,11 +32,20 @@ const db = require("knex")({
 const findPetTest = async pet_id => {
   let testResult = { test: "findPet", input: pet_id, data: [] };
   for (let i = 0; i < maxIndex; i++) {
-    let result = await Pet.find({ pet_id }, "family").explain("executionStats");
-    testResult.data.push(result[0]);
+    let result = await db.raw(
+      "EXPLAIN (ANALYZE, TIMING OFF) SELECT family FROM pets WHERE pet_id = 52"
+    );
+    let execTime = result.rows[result.rows.length - 1]["QUERY PLAN"].split(
+      " "
+    )[2];
+    testResult.data.push(execTime);
   }
   testResultsArr.push(testResult);
+  console.log(testResultsArr);
 };
+
+let maxIndex = 2;
+findPetTest(3);
 
 const findOnePetTest = async pet_id => {
   let testResult = { test: "findOnePet", input: pet_id, data: [] };

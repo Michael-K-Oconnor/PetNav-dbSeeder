@@ -88,59 +88,40 @@ const petIndexGen = num => {
   return arr;
 };
 
-const familyNameGen = num => {
+const familyNameGen = async num => {
   let arr = [];
-  Pet.find({}, "family")
-    .limit(num)
-    .then(results => {
-      results.forEach(result => {
-        let fam = JSON.parse(JSON.stringify(result)).family;
-        arr.push(fam);
-      });
-      console.log(arr);
-      return arr;
-    })
-    .catch(err => {
-      console.log("err getting familys from db: ", err);
-    });
+  let results = await Pet.find({}, "family").limit(num);
+  results.forEach(result => {
+    let fam = JSON.parse(JSON.stringify(result)).family;
+    arr.push(fam);
+  });
+  return arr;
 };
 
 ///////////////////////////////////////////////////
 //////////// PARALLEL DB QUERY TESTS  /////////////
 ///////////////////////////////////////////////////
 
-const multiFindPet = num => {
+const multiFindPet = async num => {
   let testResult = { test: "multiFindPet", input: num, data: [] };
   let arr = petIndexGen(num);
   let promiseArr = arr.map(pet_id => {
     return findOnePetPromise(pet_id);
   });
-  Promise.all(promiseArr)
-    .then(result => {
-      testResult.data = result;
-      testResultsArr.push(testResult);
-      console.log(testResultsArr[0].data);
-    })
-    .catch(err => {
-      console.log("Error with multiFindPet: ", err);
-    });
+  let result = await Promise.all(promiseArr);
+  testResult.data = result;
+  testResultsArr.push(testResult);
 };
 
 const multiFindFamily = async num => {
   let testResult = { test: "multiFindFamily", input: num, data: [] };
   let arr = await familyNameGen(num);
-  Promise.all(
-    arr.map(family => {
-      return findFamilyPromise(family);
-    })
-  )
-    .then(result => {
-      testResult.data = result;
-      testResultsArr.push(testResult);
-    })
-    .catch(err => {
-      console.log("Error with multiFindFamily: ", err);
-    });
+  let promiseArr = arr.map(family => {
+    return findFamilyPromise(family);
+  });
+  let result = await Promise.all(promiseArr);
+  testResult.data = result[0];
+  testResultsArr.push(testResult);
 };
 
 ///////////////////////////////////////////////////
@@ -164,20 +145,21 @@ async function serialTester() {
   await findSomeFamily("Carter");
   await findSomeFamily("Kuhlman");
   console.log("FindSomeFamilyTest Complete");
-  // await multiFindPet(10);
-  // await multiFindPet(100);
-  // await multiFindPet(1000);
-  // console.log("FindMultiPetTest Complete");
-  // await multiFindFamily(10);
-  // await multiFindFamily(100);
-  // await multiFindFamily(1000);
-  // console.log("FindMultiFamilyTest Complete");
+  await multiFindPet(2);
+  await multiFindPet(100);
+  await multiFindPet(1000);
+  console.log("FindMultiPetTest Complete");
+  await multiFindFamily(10);
+  await multiFindFamily(100);
+  await multiFindFamily(1000);
+  console.log("FindMultiFamilyTest Complete");
 
   let finalData = "Test,Key,AvgTime,StdDev\n";
   for (let test of testResultsArr) {
     let resultString = `${test.test},${test.input},`;
     let execTimes = [];
     for (let query of test.data) {
+      console.log(query);
       execTimes.push(query.executionStats.executionTimeMillis);
     }
     resultString += `${average(execTimes)},${standardDeviation(execTimes)}\n`;
